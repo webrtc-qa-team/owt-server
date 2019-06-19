@@ -64,6 +64,15 @@ pipeline {
 
     post {
         success {
+            podTemplate(name: 'stable-package', label: 'stable-package', cloud: 'kubernetes', containers: [
+                containerTemplate(name: 'stable-package', image: "$env.STABLE_PACKAGE_DEBUG", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '3000m', resourceLimitCpu: '4000m', network: 'host', command: 'cat'),
+                ]) {
+                node('stable-package') {
+                    container('stable-package') {
+                        sh "/root/mv_package.sh ${env.GIT_COMMIT}"
+                    }
+                }
+            }
             setBuildStatus("Build succeeded", "SUCCESS");
         }
         failure {
